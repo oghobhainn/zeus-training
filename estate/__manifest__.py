@@ -14,7 +14,6 @@
         'views/estate_menus.xml'
     ],
     'demo': [],
-    'css': ['static/src/css/crm.css'],
     'installable': True,
     'application': True,
     'auto_install': False
