@@ -33,6 +33,7 @@
                 <header>
                     <button name="action_property_sold" type="object" string="Sold"/>
                     <button name="action_property_cancelled" type="object" string="Cancel"/>
+                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -41,12 +42,11 @@
                             <field name="name" placeholder="e.g. Unknown"/>
                         </h1>
                     </div>
-                    <field name="tag_ids" widget="many2many_tags"/>
+                    <field name="tag_ids" widget="many2many_tags" options="{'color_field': color}"/>
                     <separator/>
                     <group>
                         <group>
-                            <field name="state"/>
-                            <field name="type_id"/>
+                            <field name="type_id" options="{'no_create': True}"/>
                             <field name="postcode"/>
                             <field name="date_availability"/>
                         </group>

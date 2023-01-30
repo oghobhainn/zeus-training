@@ -9,6 +9,7 @@ from odoo.exceptions import ValidationError, UserError
 class EstatePropertyOffer(models.Model):
     _name = "est.estates.property.offer"
     _description = "Estates Property Offer"
+    _order = "price desc"
 
     price = fields.Float(default=0)
     status = fields.Selection(
@@ -26,9 +27,9 @@ class EstatePropertyOffer(models.Model):
     @api.constrains('price')
     def _check_price_against_expected_price(self):
         for record in self:
-            expectedprice = self.property_id.expected_price
+            expectedprice = self.property_id.expected_price / 100 * 90
             if record.price < expectedprice:
-                raise ValidationError(('hoi %s') % (expectedprice))
+                raise ValidationError(('The selling price should be at least %s') % (expectedprice))
 
     @api.depends('validity')
     def _compute_deadline(self):
