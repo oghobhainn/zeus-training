@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Top menu item -->
+    <!--
+        This menu item's purpose is to overwrite another one defined in
+        the base module in order to set new groups.
+    -->
+    <menuitem
+        id="estate_menu_root"
+        name="Real Estate"
+        groups="base.group_user"
+        sequence="25"/>
+
+    <!-- Estates MAIN USER MENU) -->
+    <menuitem
+        id="estate_menu_advertisements"
+        name="Advertisements"
+        parent="estate_menu_root"
+        sequence="1"/>
+    <menuitem
+        id="menu_estate_properties"
+        name="Properties"
+        parent="estate_menu_advertisements"
+        action="estate_model_action"
+        sequence="1"/>
+
+    <menuitem
+        id="estate_menu_settings"
+        name="Settings"
+        parent="estate_menu_root"
+        sequence="1"/>
+    <menuitem
+        id="menu_estate_property_types"
+        name="Property Types"
+        parent="estate_menu_settings"
+        action="estate_model_type_action"
+        sequence="1"/>
+    <menuitem
+        id="menu_estate_property_tags"
+        name="Property Tags"
+        parent="estate_menu_settings"
+        action="estate_model_tag_action"
+        sequence="1"/>
+</odoo>
