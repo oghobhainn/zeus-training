@@ -1,7 +1,7 @@
 {
     'name': 'Real Estate',
     'version': '1.0',
-    'depends': ['base'],
+    'depends': [],
     'author': 'Marjan Vanhixe',
     'data': [
         'security/ir.model.access.csv',
