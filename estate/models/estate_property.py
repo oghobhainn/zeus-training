@@ -29,4 +29,4 @@ class EstateProperty(models.Model):
     salesperson = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
     buyer = fields.Many2one('res.partner', string='Buyer', copy=False)
     tags_id = fields.Many2many('estate.property.tage', string='Tags')
-    offer_ids = fields.One2many('estate.property.offer', string='Offer')
+    offer_ids = fields.One2many('estate.property.offer', 'property_id', string='Offers')

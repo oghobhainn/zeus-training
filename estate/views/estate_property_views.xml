@@ -75,7 +75,7 @@
                                 <field name="garden_orientation" />
                             </group>
                         </page>
-                        <page string="Offer">
+                        <page string="Offers">
                             <field name="offer_ids" />
                         </page>
                         <page string="Other Info">
