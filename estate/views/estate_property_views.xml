@@ -13,6 +13,7 @@
         <field name="arch" type="xml">
             <tree string="Properties">
                 <field name="name"/>
+                <field name="tag_ids" widget="many2many_tags"/>
                 <field name="postcode"/>
                 <field name="bedrooms"/>
                 <field name="living_area"/>
@@ -49,6 +50,10 @@
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <form string="Property">
+                <header>
+                    <button name="action_sold" type="object" string="SOLD"/>
+                    <button name="action_cancel" type="object" string="CANCEL"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
@@ -64,6 +69,7 @@
                         </group>
                         <group>
                             <field name="expected_price"/>
+                            <field name="best_price"/>
                             <field name="selling_price"/>
                         </group>
                         <notebook>
@@ -78,6 +84,7 @@
                                     <field name="garden_area"/>
                                     <field name="garden_orientation"/>
                                     <field name="state"/>
+                                    <field name="total_area"/>
                                 </group>
                             </page>
                             <page string="Offers">
