@@ -16,11 +16,23 @@
         <field name="arch" type="xml">
             <form string="Property Types">
                 <sheet>
+                    <field name="sequence" widget="handle"/>
                     <div class="Title">
                         <h1>
                             <field name="name" />
                         </h1>
                     </div>
+                    <notebook>
+                        <page string="Properties">
+                            <field name="property_ids">
+                                <tree>
+                                    <field name="name" />
+                                    <field name="expected_price" />
+                                    <field name="state" />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

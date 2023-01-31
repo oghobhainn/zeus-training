@@ -43,6 +43,11 @@
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <form string="Estate Property">
+                <header>
+                    <button name="action_set_sold" string="Sold" type="object" />
+                    <button name="action_set_cancel" string="Cancel" type="object" />
+                    <field name="state" widget="statusbar" statusbar_visible="new,offer_received,offer_accepted,sold"/>
+                </header>
                 <sheet>
                     <field name="active" invisible="1" />
                     <div class="Title">
@@ -53,12 +58,14 @@
                     </div>
                     <group>
                         <group>
+                            <field name="state" />
                             <field name="property_type" />
                             <field name="postcode" />
                             <field name="data_availability" />
                         </group>
                         <group>
                             <field name="expected_price" />
+                            <field name="best_price" />
                             <field name="selling_price" />
                         </group>
                     </group>
@@ -73,6 +80,7 @@
                                 <field name="garden" />
                                 <field name="garden_area" />
                                 <field name="garden_orientation" />
+                                <field name="total_area" />
                             </group>
                         </page>
                         <page string="Offers">
