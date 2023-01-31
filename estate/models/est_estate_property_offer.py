@@ -15,7 +15,8 @@ class EstatePropertyOffer(models.Model):
     status = fields.Selection(
         selection=[('accepted', 'Accepted'), ('refused', 'Refused')])
     partner_id = fields.Many2one("res.partner", required=True)
-    property_id = fields.Many2one("est.estates.property", required=True)
+    property_id = fields.Many2one("est.estates.property", required=True, ondelete='cascade')
+    property_type_id = fields.Many2one(related='property_id.type_id')
     validity = fields.Integer('Validity (days)', default=7)
     date_deadline = fields.Date('Deadline', compute='_compute_deadline', inverse='_inverse_deadline')
 
@@ -30,6 +31,14 @@ class EstatePropertyOffer(models.Model):
             expectedprice = self.property_id.expected_price / 100 * 90
             if record.price < expectedprice:
                 raise ValidationError(('The selling price should be at least %s') % (expectedprice))
+
+    @api.model
+    def create(self, vals):
+        if self.search_count([('price', '>', vals['price'])]):
+            raise UserError('You can create an offer with a price lower than an existing offer!')
+
+        self.env['est.estates.property'].browse(vals['property_id']).state = 'offer received'
+        return super().create(vals)
 
     @api.depends('validity')
     def _compute_deadline(self):

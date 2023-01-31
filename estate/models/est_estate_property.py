@@ -48,6 +48,11 @@ class EstateProperty(models.Model):
     ]
     # private functions
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_state_is_new_or_cancelled(self):
+        if any(property.state not in ['new', 'cancelled'] for property in self):
+            raise UserError('You cannot delete a property that is not new or cancelled!')
+
     @api.depends('living_area', 'garden_area')
     def _set_area(self):
         for record in self:
@@ -63,7 +68,7 @@ class EstateProperty(models.Model):
     @api.depends('offer_ids.status')
     def _compute_selling_price(self):
         self.selling_price = 0
-        self.buyer = ''
+        self.buyer = self.env["res.partner"]
         for offer in self.offer_ids:
             if offer.status == 'accepted':
                 self.selling_price = offer.price
