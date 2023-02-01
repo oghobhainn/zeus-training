@@ -7,6 +7,12 @@ class EstateProperty(models.Model):
     _description = "Estate Properties"
     _order = "id desc"
 
+    _sql_constraints = [
+        ('estate_property_check_expected_price', 'CHECK(expected_price > 0)',
+                'The expected price must be strictly positive.'),
+        ('estate_property_check_selling_price', 'CHECK(selling_price > 0)', 'The selling price must be positive.'),
+    ]
+
     name = fields.Char('Title', required=True)
     description = fields.Text('Description')
     postcode = fields.Char('Postcode')
@@ -68,6 +74,11 @@ class EstateProperty(models.Model):
                 record.garden_area = 0
                 record.garden_orientation = None
 
+    @api.ondelete(at_uninstall=False)
+    def _unlike_if_state_not_new_and_not_cancel(self):
+        if not self.state in ['new','cancel']:
+            raise exceptions.UserError(_('It is not allowed to delete the record!'))
+
     def action_set_sold(self):
         message = 'You can\'t set a cancelled property to sold!'
         if self.state == 'cancel':
@@ -79,13 +90,7 @@ class EstateProperty(models.Model):
     def action_set_cancel(self):
         message = 'You can\'t set a sold property to cancelled!'
         if self.state == 'sold':
-            raise exceptions.UserError(_('You can\'t set a sold property to cancelled!'))
+            raise exceptions.UserError(_(message))
 
         self.state = 'cancel'
         return True
-
-    _sql_constraints = [
-        ('estate_property_check_expected_price', 'CHECK(expected_price > 0)',
-                'The expected price must be strictly positive.'),
-        ('estate_property_check_selling_price', 'CHECK(selling_price > 0)', 'The selling price must be positive.'),
-    ]

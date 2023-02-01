@@ -6,6 +6,9 @@
         <field name="arch" type="xml">
             <tree string="Property Types">
                 <field name="name"/>
+                <field name="offer_ids" />
+                <field name="offer_count" />
+                <field name="sequence" widget="handle"/>
             </tree>
         </field>
     </record>
@@ -16,8 +19,12 @@
         <field name="arch" type="xml">
             <form string="Property Types">
                 <sheet>
-                    <field name="sequence" widget="handle"/>
-                    <div class="Title">
+                    <div class="oe_button_box" name="button_box" >
+                        <button name="action_open_offers" type="object" class="oe_stat_button" icon="fa-star">
+                            <field name="offer_count" string="Offers" widget="statinfo" />
+                        </button>
+                    </div>
+                    <div class="oe_title">
                         <h1>
                             <field name="name" />
                         </h1>

@@ -5,8 +5,9 @@ class EstatePropertyTage(models.Model):
     _description = "Estate Properties Tags"
     _order = "name"
 
-    name = fields.Char('Name', required=True)
-
     _sql_constraints = [
         ('name', 'unique (name)', """Only one value can be defined for each given tag!"""),
     ]
+
+    name = fields.Char('Name', required=True)
+    color = fields.Integer('Color')
