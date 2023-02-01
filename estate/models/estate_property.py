@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
-
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError,ValidationError
 
 class EstateProperty(models.Model):
     _name = "estate.property"
     _description = "Estate Property"
+    _order = "id desc"
 
     name = fields.Char(required=True)
     description = fields.Text()
     postcode = fields.Char()
     date_availability = fields.Date(default=fields.Datetime.add(fields.Datetime.now(),months=3),copy=False)
     expected_price = fields.Float(required=True)
-    selling_price = fields.Float(readonly=True,copy=False)
+    selling_price = fields.Float(readonly=True,copy=False,compute="_compute_selling_price")
     bedrooms = fields.Integer(default=2)
     living_area = fields.Integer()
     facades = fields.Integer()
@@ -30,15 +31,22 @@ class EstateProperty(models.Model):
         selection=[('New', 'New'), ('Offer Received', 'Offer Received'), ('Offer Accepted', 'Offer Accepted'),
                    ('Sold', 'Sold'), ('Canceled', 'Canceled')],
         default='New',
-        copy=False
+        copy=False,
         )
     property_type_id = fields.Many2one("estate.property.type")
     salesman_id = fields.Many2one("res.users", string="Salesman", index=True, default=lambda self: self.env.user)
-    buyer_id = fields.Many2one("res.partner", string="Buyer")
+    buyer_id = fields.Many2one("res.partner", string="Buyer",compute="_compute_buyer_id")
     tag_ids = fields.Many2many("estate.property.tag", string="Tags")
     offer_ids = fields.One2many("estate.property.offer","property_id")
     total_area = fields.Float(compute="_compute_total_area")
     best_price = fields.Float(compute="_compute_best_price")
+
+    _sql_constraints = [
+        ('check_expected_price', 'CHECK(expected_price > 0)',
+         'Expected price must be strictly positive'),
+        ('check_selling_price', 'CHECK(selling_price > 0)',
+         'Selling price must be positive')
+    ]
 
     @api.depends("living_area", "garden_area")
     def _compute_total_area(self):
@@ -61,5 +69,34 @@ class EstateProperty(models.Model):
             else:
                 record.garden_area = 0
                 record.garden_orientation = ''
+    @api.depends("offer_ids.status")
+    def _compute_selling_price(self):
+        self.selling_price = 0;
+        for offer in self.offer_ids:
+            if offer.status == 'Accepted' :
+              self.selling_price = offer.price
+    @api.depends("offer_ids.status")
+    def _compute_buyer_id(self):
+        self.buyer_id = '';
+        for offer in self.offer_ids:
+            if offer.status == 'Accepted':
+               self.buyer_id = offer.partner_id
+    def action_cancel_property(self):
+        for property in self:
+            if property.state == "Sold":
+                raise UserError('Property already sold : cannot be canceled !')
+            property.state = "Canceled"
 
+    def action_set_to_sold(self):
+        for property in self:
+            if property.state == "Canceled":
+                raise UserError('Property already canceled : cannot be sold !')
+            property.state = "Sold"
+
+    '''' 
+    def  action_do_something(self):
+        for record in self:
+            record.name = "Something"
+        return True
+    '''
 
