@@ -60,19 +60,22 @@ class EstateProperty(models.Model):
 
     @api.depends('offer_ids.price')
     def _compute_best_price(self):
-        self.best_price = 0
-        for offer in self.offer_ids:
-            if self.best_price < offer.price:
-                self.best_price = offer.price
+        for record in self:
+            record.best_price = 0
+            for offer in record.offer_ids:
+                if record.best_price < offer.price:
+                    record.best_price = offer.price
 
     @api.depends('offer_ids.status')
     def _compute_selling_price(self):
-        self.selling_price = 0
-        self.buyer = self.env["res.partner"]
-        for offer in self.offer_ids:
-            if offer.status == 'accepted':
-                self.selling_price = offer.price
-                self.buyer = offer.partner_id
+        for record in self:
+            record.selling_price = 0
+            record.buyer = record.env["res.partner"]
+            for offer in record.offer_ids:
+                if offer.status == 'accepted':
+                    record.selling_price = offer.price
+                    record.buyer = offer.partner_id
+                    record.state = 'offer accepted'
 
     @api.onchange('garden')
     def _onchange_garden(self):

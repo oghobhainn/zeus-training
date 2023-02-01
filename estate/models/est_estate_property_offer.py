@@ -18,7 +18,7 @@ class EstatePropertyOffer(models.Model):
     property_id = fields.Many2one("est.estates.property", required=True, ondelete='cascade')
     property_type_id = fields.Many2one(related='property_id.type_id')
     validity = fields.Integer('Validity (days)', default=7)
-    date_deadline = fields.Date('Deadline', compute='_compute_deadline', inverse='_inverse_deadline')
+    date_deadline = fields.Date('Deadline', compute='_compute_deadline', inverse='_inverse_deadline', default=fields.Date.add(fields.Date.today(), days=7))
 
     _sql_constraints = [
         ('Check_price', 'CHECK(price > 0)',
@@ -33,13 +33,17 @@ class EstatePropertyOffer(models.Model):
                 raise ValidationError(('The selling price should be at least %s') % (expectedprice))
 
     @api.model
+    def write(self, vals):
+        if vals.get('price'):
+            if self.search_count([('price', '>', vals['price']), ('property_id', '=', vals['property_id'])]) > 0:
+                raise UserError('You can create an offer with a price lower than an existing offer!')
+
+        return super().write(vals)
+
     def create(self, vals):
-        if self.search_count([('price', '>', vals['price'])]):
-            raise UserError('You can create an offer with a price lower than an existing offer!')
+        self.env['est.estates.property'].browse(self.property_id.id).state = 'offer received'
 
-        self.env['est.estates.property'].browse(vals['property_id']).state = 'offer received'
         return super().create(vals)
-
     @api.depends('validity')
     def _compute_deadline(self):
         for record in self:
@@ -54,10 +58,11 @@ class EstatePropertyOffer(models.Model):
                 record.validity = deltadate.days
 
     def action_property_offer_accept(self):
-        for record in self:
-            record.status ='accepted'
-        if self.search_count([('status', '=', 'accepted')]) > 1:
+        if self.search_count([('status', '=', 'accepted'), ('property_id', '=', self.property_id.id)]) > 0:
             raise ValidationError('Only 1 offer can be accepted!')
+
+        for record in self:
+            record.status = 'accepted'
 
     def action_property_offer_refuse(self):
         for record in self:

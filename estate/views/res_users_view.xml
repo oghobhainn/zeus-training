@@ -8,9 +8,7 @@
             <xpath expr="//page[@name='preferences']" position="after">
                 <page string="Real Estate Properties" name="estateproperties">
                     <field name="property_ids" context="{
-                        'tree_view_ref': 'estate.estate_model_tree'}"
-                           domain="['|', ('state','=','new'),('state','=','offer received')]"
-                        mode="tree"/>
+                        'tree_view_ref': 'estate.estate_model_tree'}" mode="tree"/>
                 </page>
             </xpath>
         </field>
