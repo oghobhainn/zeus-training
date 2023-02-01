@@ -1,13 +1,15 @@
 from odoo import fields, models, api
-
-from datetime import datetime, date
+from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
+from odoo.exceptions import ValidationError
+from odoo.tools.float_utils import float_is_zero, float_compare
 
 class EstateProperty(models.Model):
     _name = "estate.property"
     _description = "Estate Property App"
+    _order = "id desc"
 
-    name= fields.Char("Estate property name", required=True)
+    name= fields.Char("Title", required=True)
     description = fields.Text("Description")
     postcode = fields.Char("Postcode")
     date_availability = fields.Date("Available From", copy=False, default=fields.Datetime.now() + relativedelta(months=3))
@@ -22,11 +24,11 @@ class EstateProperty(models.Model):
     garden_orientation = fields.Selection(
         string="Orientation",
         selection=[("north", "North"), ("south", "South"), ("east", "East"), ("west", "West")],
-        help="Orientation is used to define the orientation")
+        help="Defines the direction in which the garden in oriented")
 
     active = fields.Boolean(default=True)
     state = fields.Selection(
-        string="States",
+        string="Status",
         selection=[("new", "New"), ("offer received", "Offer Received"), ("offer accepted", "Offer Accepted"), ("sold", "Sold"), ("canceled", "Canceled")],
         default="new",
         help="Choose the state of the Offer")
@@ -45,22 +47,51 @@ class EstateProperty(models.Model):
 
     @api.depends("living_area", "garden_area")
     def _compute_total_area(self):
-        for record in self:
-            record.total_area = record.living_area + record.garden_area
+        for property in self:
+            property.total_area = property.living_area + property.garden_area
 
     @api.depends("offer_ids")
     def _calculate_best_price(self):
         self.best_price = 0
-        for record in self.offer_ids:
-            if self.best_price < record.price:
-               self.best_price = record.price
+        for offers in self.offer_ids:
+            if self.best_price < offers.price:
+               self.best_price = offers.price
 
     @api.onchange("garden")
     def _onchange_garden(self):
-        for record in self:
-            if record.garden:
-                record.garden_area = 10
-                record.garden_orientation = "north"
+        for property in self:
+            if property.garden:
+                property.garden_area = 10
+                property.garden_orientation = "north"
             else:
-                record.garden_area = 0
-                record.garden_orientation = ""
+                property.garden_area = 0
+                property.garden_orientation = ""
+
+    def set_estate_property_to_sold(self):
+        for property in self:
+            if property.state == "canceled":
+                raise UserError("Canceled properties cannot be sold!")
+            else:
+                property.state = "sold"
+        return True
+
+    def set_estate_property_to_canceled(self):
+        for property in self:
+            if property.state == "sold":
+                raise UserError("Sold properties cannot be canceled!")
+            else:
+                property.state = "canceled"
+        return True
+
+    @api.constrains('selling_price','expected_price')
+    def _check_selling_price(self):
+        for record in self:
+            if not float_is_zero(record.selling_price, precision_digits=2):
+                if float_compare(record.selling_price, record.expected_price * 0.9, precision_digits=2) == -1:
+                    raise ValidationError("Selling Price cannot be lower than 90% of the Expected Price!")
+
+    _sql_constraints = [
+        ('check_expected_price', 'CHECK(expected_price > 0)', 'The selling price must be strictly positive!'),
+        ('check_selling_price', 'CHECK(selling_price >= 0)', 'The expected price must be positive!')
+    ]
+
