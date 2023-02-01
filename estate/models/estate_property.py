@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError, UserError
 class EstateProperty(models.Model):
 	_name = "estate.property"
 	_description = "estate property"
+	_order = "id desc"
 
 	name = fields.Char(string="Title", required=True)
 	description = fields.Text(string="Description")
@@ -52,6 +53,18 @@ class EstateProperty(models.Model):
 		 'The selling price should not be negative!')
 	]
 
+	@api.ondelete(at_uninstall=False)
+	def _check_state_on_delete(self):
+		for record in self:
+			if not record.state in ['new', 'canceled']:
+				raise UserError('Only new and canceled properties can be deleted.')
+
+	@api.model
+	def create(self, vals):
+		res = super().create(vals)
+		res.state = 'offer received'
+		return res
+
 	@api.depends("living_area", "garden_area")
 	def _compute_total_area(self):
 		for record in self:
@@ -70,11 +83,14 @@ class EstateProperty(models.Model):
 	def _compute_selling_price(self):
 		for record in self:
 			record.reset_selling_price()
-			accepted_offer = record.env['estate.property.offer'].search([('status', '=', 'accepted'),
-																   ('property_id', '=', record.name)])
-			if accepted_offer:
-					record.selling_price = accepted_offer.price
-					record.buyer_id = accepted_offer.partner_id
+			accepted_offers = self.env['estate.property.offer'].search([('status', '=', 'accepted'),
+															   ('property_id.name', '=', record.name)])
+			for accepted_offer in accepted_offers:
+				record.selling_price = accepted_offer.price
+				record.buyer_id = accepted_offer.partner_id
+				break
+
+
 
 	@api.onchange("garden")
 	def _onchange_garden(self):

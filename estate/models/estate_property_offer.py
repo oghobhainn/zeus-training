@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError, UserError
 class EstatePropertyOffer(models.Model):
 	_name = "estate.property.offer"
 	_description = "estate property offer"
+	_order = "price desc"
 
 	price = fields.Float(string="Price")
 	status = fields.Selection(
@@ -15,11 +16,27 @@ class EstatePropertyOffer(models.Model):
 	property_id = fields.Many2one("estate.property", String="Property", required=True)
 	validity = fields.Integer(String="Validity (days)", default=7)
 	date_deadline = fields.Date(String="Deadline", compute="_compute_deadline", inverse="_inverse_deadline")
+	property_type_id = fields.Many2one("estate.property.type", String="Property Type", compute="_compute_property_type", store=True)
 
 	_sql_constraints = [
 		('check_offer_price', 'CHECK(price > 0)',
 		 'The offer price should be strictly positive!')
 	]
+
+	@api.model
+	def create(self, vals):
+		res = super().create(vals)
+		# raise UserError(res.property_id)
+		max_offer = max(self.env['estate.property.offer'].search([('property_id', '=', res.property_id.id)]).mapped('price'))
+		if res.price < max_offer:
+			raise UserError(f'The offer must be higher than {max_offer:,.2f} Euro.')
+
+		return res
+
+	@api.depends("property_id.property_type_id")
+	def _compute_property_type(self):
+		for record in self:
+			record.property_type_id = record.property_id.property_type_id
 
 	@api.constrains("price", "status")
 	def _check_price(self):
@@ -46,7 +63,8 @@ class EstatePropertyOffer(models.Model):
 
 	def action_accept(self):
 		self.status = 'accepted'
-		if self.search_count([('status', '=', 'accepted')]) > 1:
+
+		if self.search_count([('status', '=', 'accepted'), ('property_id', '=', self.property_id.name)]) > 1:
 			raise ValidationError('Only one offer can be accepted for a given property!')
 
 	def action_refuse(self):
