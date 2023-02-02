@@ -13,6 +13,7 @@
         'account',
     ],
     'data': [
+        'views/estate_properties_views.xml',
     ],
     'installable': True,
     'application': True,

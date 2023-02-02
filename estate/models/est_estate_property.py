@@ -93,7 +93,7 @@ class EstateProperty(models.Model):
             if record.state == 'cancelled':
                 raise ValidationError(("An Estate Property that is %s can not be %s") % (record.state,'sold'))
             else:
-                record.state ='sold'
+                record.state = 'sold'
 
     def action_property_cancelled(self):
         for record in self:

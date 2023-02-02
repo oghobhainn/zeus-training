@@ -61,21 +61,24 @@
                             <field name="expected_price"/>
                             <field name="selling_price"/>
                             <field name="best_price"/>
-                            <field name="state"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Description">
                             <group>
-                                <field name="description"/>
-                                <field name="bedrooms"/>
-                                <field name="living_area"/>
-                                <field name="facades"/>
-                                <field name="garage"/>
-                                <field name="garden"/>
-                                <field name="garden_area" attrs="{'invisible': [('garden', '=', False)]}"/>
-                                <field name="garden_orientation" attrs="{'invisible': [('garden', '=', False)]}"/>
-                                <field name="total_area"/>
+                                <group>
+                                    <field name="description"/>
+                                    <field name="bedrooms"/>
+                                    <field name="living_area"/>
+                                    <field name="facades"/>
+                                </group>
+                                <group>
+                                    <field name="garage"/>
+                                    <field name="garden"/>
+                                    <field name="garden_area" attrs="{'invisible': [('garden', '=', False)]}"/>
+                                    <field name="garden_orientation" attrs="{'invisible': [('garden', '=', False)]}"/>
+                                    <field name="total_area"/>
+                                </group>
                             </group>
                         </page>
                         <page string="Offers">

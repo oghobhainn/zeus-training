@@ -40,8 +40,10 @@ class EstatePropertyOffer(models.Model):
 
         return super().write(vals)
 
+    @api.model
     def create(self, vals):
-        self.env['est.estates.property'].browse(self.property_id.id).state = 'offer received'
+        property = self.env['est.estates.property'].browse(vals['property_id'])
+        property.write({'state': 'offer received'})
 
         return super().create(vals)
     @api.depends('validity')
