@@ -6,13 +6,19 @@ class EstateProperty(models.Model):
 	_name = "estate.property"
 	_description = "estate property"
 	_order = "id desc"
+	_sql_constraints = [
+		('check_expected_price2', 'CHECK(expected_price > 0)',
+		 'The expected price should be strictly positive!'),
+		('check_selling_price2', 'CHECK(selling_price >= 0)',
+		 'The selling price should not be negative!')
+	]
 
 	name = fields.Char(string="Title", required=True)
 	description = fields.Text(string="Description")
 	postcode = fields.Char(string="Postcode")
 	date_availability = fields.Date(string="Available From",
 									copy=False,
-									default=lambda self: fields.Datetime.today() + timedelta(days=90)
+									default=fields.Datetime.today() + timedelta(days=90)
 									)
 	expected_price = fields.Float(string="Expected Price", required=True)
 	selling_price = fields.Float(string="Selling Price", readonly=True, copy=False, compute="_compute_selling_price")
@@ -46,17 +52,10 @@ class EstateProperty(models.Model):
 	total_area = fields.Float(String="Total Area", compute="_compute_total_area")
 	best_price = fields.Float(String="Best Offer", compute="_compute_best_offer")
 
-	_sql_constraints = [
-		('check_expected_price2', 'CHECK(expected_price > 0)',
-		 'The expected price should be strictly positive!'),
-		('check_selling_price2', 'CHECK(selling_price >= 0)',
-		 'The selling price should not be negative!')
-	]
-
 	@api.ondelete(at_uninstall=False)
 	def _check_state_on_delete(self):
-		for record in self:
-			if not record.state in ['new', 'canceled']:
+		for estate_property in self:
+			if not estate_property.state in ['new', 'canceled']:
 				raise UserError('Only new and canceled properties can be deleted.')
 
 	@api.model
@@ -67,30 +66,28 @@ class EstateProperty(models.Model):
 
 	@api.depends("living_area", "garden_area")
 	def _compute_total_area(self):
-		for record in self:
-			record.total_area = record.living_area + record.garden_area
+		for estate_property in self:
+			estate_property.total_area = estate_property.living_area + estate_property.garden_area
 
 
 	@api.depends("offer_ids.price")
 	def _compute_best_offer(self):
 		self.best_price = 0
-		for record in self:
+		for estate_property in self:
 			# record.best_price = max(self.env['estate.property.offer'].search([]).mapped('price'))
-			if record.offer_ids:
-				record.best_price = max(offer.price for offer in record.offer_ids)
+			if estate_property.offer_ids:
+				estate_property.best_price = max(offer.price for offer in estate_property.offer_ids)
 
 	@api.depends("offer_ids.status")
 	def _compute_selling_price(self):
-		for record in self:
-			record.reset_selling_price()
+		for estate_property in self:
+			estate_property.reset_selling_price()
 			accepted_offers = self.env['estate.property.offer'].search([('status', '=', 'accepted'),
-															   ('property_id.name', '=', record.name)])
+															   ('property_id.name', '=', estate_property.name)])
 			for accepted_offer in accepted_offers:
-				record.selling_price = accepted_offer.price
-				record.buyer_id = accepted_offer.partner_id
+				estate_property.selling_price = accepted_offer.price
+				estate_property.buyer_id = accepted_offer.partner_id
 				break
-
-
 
 	@api.onchange("garden")
 	def _onchange_garden(self):
@@ -113,7 +110,6 @@ class EstateProperty(models.Model):
 			raise ValidationError(("An %s property cannot be %s") % (self.state, 'canceled'))
 		else:
 			self.state = 'canceled'
-
 
 	def reset_selling_price(self):
 		self.selling_price = 0
