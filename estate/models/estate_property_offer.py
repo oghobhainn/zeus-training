@@ -21,6 +21,7 @@ class EstatePropertyOffer(models.Model):
 
     validity = fields.Integer(default = 7)
     date_deadline = fields.Date(compute="_compute_deadline", inverse="_inverse_deadline")
+    property_type_id = fields.Many2one(related = "property_id.property_type_id")
 
     _sql_constraints = [
         ('check_offer_price', 'CHECK(price >= 0)',
@@ -54,6 +55,20 @@ class EstatePropertyOffer(models.Model):
     def action_refuse_offer(self):
         for offer in self:
             offer.status = "Refused"
+
+    @api.model
+    def create(self, vals):
+        property = self.env['estate.property'].browse(vals['property_id'])
+        if property.state == 'New':
+            property.state = 'Offer Received'
+
+        offer_price = vals['price']
+        for offer in property.offer_ids :
+            if offer_price < offer.price :
+               error_message = str('Offer price must be higher then {}' + format(offer.price))
+               raise ValidationError(error_message)
+
+        return super().create(vals)
 
 
 

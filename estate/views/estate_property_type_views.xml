@@ -4,6 +4,7 @@
         <field name="res_model">estate.property.type</field>
         <field name="view_mode">tree,form</field>
     </record>
+
     <record id="estate_property_type_view_tree" model="ir.ui.view">
         <field name="name">Estate property type ist view</field>
         <field name="model">estate.property.type</field>
@@ -11,6 +12,7 @@
              <tree string="Tests">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
+                <field name="offer_count"/>
              </tree>
         </field>
     </record>
@@ -19,18 +21,26 @@
         <field name="model">estate.property.type</field>
         <field name="arch" type="xml">
             <form string="Tests">
-                <div>
-                  <h1>
-                    <field name = "name"/>
-                  </h1>
-                </div>
-                <field name="property_ids">
-                    <tree>
-                        <field name="name"/>
-                        <field name="expected_price"/>
-                        <field name="state"/>
-                    </tree>
-                </field>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="action" name="%(estate_property_offer_action)d" icon="fa-life-ring" >
+                            <field name="offer_count" widget="statinfo" string="Offers"/>
+                        </button>
+                    </div>
+                    <div>
+                      <h1>
+                        <field name = "name"/>
+                      </h1>
+                    </div>
+                    <field name="offer_count"/>
+                    <field name="property_ids">
+                        <tree>
+                            <field name="name"/>
+                            <field name="expected_price"/>
+                            <field name="state"/>
+                        </tree>
+                    </field>
+                </sheet>
             </form>
         </field>
     </record>

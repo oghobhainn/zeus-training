@@ -93,10 +93,15 @@ class EstateProperty(models.Model):
                 raise UserError('Property already canceled : cannot be sold !')
             property.state = "Sold"
 
-    '''' 
-    def  action_do_something(self):
-        for record in self:
-            record.name = "Something"
-        return True
-    '''
+    @api.ondelete(at_uninstall=False)
+    def check_status_on_delete(self):
+        for property in self:
+            if not (property.state in ('New','Canceled')):
+                raise ValidationError("offer with status New or Canceled cannot be deleted")
 
+
+    '''
+    def create(self, vals):
+        self.env['gamification.badge'].browse(vals['badge_id']).check_granting()
+        return super(BadgeUser, self).create(vals)
+    '''
