@@ -32,8 +32,8 @@ class EstateProperty(models.Model):
 
     def action_property_sold(self):
         super().action_property_sold()
-        # create invoice from estate property
 
+        # create invoice from estate property
         move = self.env['account.move'].create({'partner_id': self.buyer.id,
                                                 'move_type': 'out_invoice',
                                                 'line_ids': [
