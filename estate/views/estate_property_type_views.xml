@@ -23,19 +23,9 @@
         <field name="arch" type="xml">
             <form string="Property Types">
                 <sheet>
-                    <!--
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" type="action" name="Test" icon="fa-users">
-                            <field string="Employees" name="total_employee" widget="statInfo"/>
-                        </button>
-                        <button class="oe_stat_button" type="object" name="Test" icon="fa-list-ul">
-                            <field string="Plans" name="plans_count" widget="statInfo"/>
-                        </button>
-                    </div>
-                    -->
-                    <div class="oe_button_box" name="button_box">
-                        <button name="%(estate_property_offers_action)d" type="action" class="oe_stat_button" icon="fa-bars" string="Offers">
-                            <field name="offer_count"/>
+                        <button name="%(estate_property_offers_action)d" type="action" class="oe_stat_button" icon="fa-life-ring" string="Offers">
+                            <field name="offer_count" string="Offers" widget="statinfo"/>
                         </button>
                     </div>
                     <div class="title">

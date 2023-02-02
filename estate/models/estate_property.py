@@ -90,8 +90,14 @@ class EstateProperty(models.Model):
                 if float_compare(record.selling_price, record.expected_price * 0.9, precision_digits=2) == -1:
                     raise ValidationError("Selling Price cannot be lower than 90% of the Expected Price!")
 
+    @api.ondelete(at_uninstall=False)
+    def check_status_on_delete(self):
+        for property in self:
+            if (property.state != "new") and (property.state != "canceled"):
+                raise UserError("Only new or canceled properties can be deleted!")
+
     _sql_constraints = [
-        ('check_expected_price', 'CHECK(expected_price > 0)', 'The selling price must be strictly positive!'),
-        ('check_selling_price', 'CHECK(selling_price >= 0)', 'The expected price must be positive!')
+        ('check_expected_price', 'CHECK(expected_price > 0)', 'The expected price must be strictly positive!'),
+        ('check_selling_price', 'CHECK(selling_price >= 0)', 'The selling price must be positive!')
     ]
 

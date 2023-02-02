@@ -30,6 +30,18 @@ class EstatePropertyOffer(models.Model):
                 record.date_deadline = record.create_date
 
             record.date_deadline += relativedelta(days=record.validity)
+    @api.model
+    def create(self, vals):
+        property = self.env['estate.property'].browse(vals['property_id'])
+        property.state = "offer received"
+
+        offer_price = vals['price']
+
+        for offer in property.offer_ids:
+            if offer.price > offer_price:
+                raise UserError(("The offer must be higher than %d!" , offer.price))
+
+        return super().create(vals)
 
     def _inverse_deadline(self):
         pass
