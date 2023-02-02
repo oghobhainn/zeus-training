@@ -47,11 +47,11 @@ class EstatePropertyOffer(models.Model):
     @api.constrains('price')
     def check_selling_price(self):
         for record in self:
-            if record.status == 'accepted':
-                expected_price = record.property_id.expected_price
-                if record.price != 0:
-                    if ((0.9 * expected_price) > record.price):
-                        raise exceptions.ValidationError(_("The offered price is to low!"))
+            expected_price = record.property_id.expected_price
+            if (record.status == 'accepted') and ((0.9 * expected_price) > record.price):
+                #if record.price != 0:
+                #    if ((0.9 * expected_price) > record.price):
+                raise exceptions.ValidationError(_("The offered price is to low!"))
 
     def action_accept(self):
         #import ipdb; ipdb.set_trace()
@@ -59,6 +59,7 @@ class EstatePropertyOffer(models.Model):
             raise exceptions.ValidationError(_('Only 1 record can be accepted'))
         else:
             self.status = 'accepted'
+            self.property_id.state = 'offer_accepted'
 
     def action_refuse(self):
         self.status = 'refused'
