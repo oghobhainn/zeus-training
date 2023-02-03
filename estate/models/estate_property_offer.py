@@ -31,6 +31,21 @@ class EstatePropertyOffer(models.Model):
 
             offer.date_deadline = fields.Date.add(date_creation, days=offer.validity)
 
+    def _inverse_date_deadline(self):
+        #print('Hello inverse')
+        #import ipdb;
+        #ipdb.set_trace()
+
+        for offer in self:
+            if not offer.create_date:
+                date_creation = datetime.date(fields.Date.today())
+            else:
+                date_creation = datetime.date(offer.create_date)
+
+            deltadays = offer.date_deadline - date_creation
+
+            offer.validity = deltadays.days
+
     @api.constrains('price', 'status')
     def check_percentage_price(self):
         message = 'The selling price must be 90% of the expected price'
@@ -40,22 +55,17 @@ class EstatePropertyOffer(models.Model):
                     if offer.price < expectedprice:
                         raise ValidationError(_(message))
 
-    def _inverse_date_deadline(self):
-        #print('Hello inverse')
-        #import ipdb;
-        #ipdb.set_trace()
+    @api.model
+    def create(self, vals):
+        #res.state = 'offer received'
+        #highest_offer = max(self.env['estate.property.offer'].search([('property_id', '=', res.property_id.id)]).mapped('price')
+        domain = [('price', '>', vals['price']), ('property_id', '=', vals['property_id'])]
+        if self.search_count(domain) > 0:
+            raise exceptions.UserError(_('The offer must be higher than the highest offer.'))
 
-        for offer in self:
-            date_creation = offer.create_date
-            if not offer.create_date:
-                date_creation = fields.Date.today()
-            else:
-                date_creation = offer.create_date
+        self.env['estate.property'].browse(vals['property_id']).state = 'offer received'
 
-            date_creation = datetime.date(offer.create_date)
-            deltadays = offer.date_deadline - date_creation
-
-            offer.validity = deltadays.days
+        return super().create(vals)
 
     def action_offer_accept(self):
         for offer in self:

@@ -4,7 +4,7 @@
 from odoo import fields, models, api, exceptions, _
 import datetime
 from dateutil.relativedelta import relativedelta
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 class EstateProperty(models.Model):
     _name = "estate.property"
@@ -83,6 +83,12 @@ class EstateProperty(models.Model):
         #example
         #self.name = "Document for %s" % (self.partner_id.name)
         #self.description = "Default description for %s" % (self.partner_id.name)
+
+    @api.ondelete(at_uninstall=False)
+    def _check_state_on_delete(self):
+        for estate_property in self:
+            if not estate_property.state in ['new', 'canceled']:
+                raise UserError('Only new and canceled estate properties can be deleted.')
 
     def action_sold(self):
         #example
