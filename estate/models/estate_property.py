@@ -8,6 +8,12 @@ class EstateProperty(models.Model):
     _name = "estate.property"
     _description = "Estate Property"
     _order = "id desc"
+    _sql_constraints = [
+        ('check_expected_price', 'CHECK(expected_price > 0)',
+         'Expected price must be strictly positive'),
+        ('check_selling_price', 'CHECK(selling_price > 0)',
+         'Selling price must be positive')
+    ]
 
     name = fields.Char(required=True)
     description = fields.Text()
@@ -41,12 +47,7 @@ class EstateProperty(models.Model):
     total_area = fields.Float(compute="_compute_total_area")
     best_price = fields.Float(compute="_compute_best_price")
 
-    _sql_constraints = [
-        ('check_expected_price', 'CHECK(expected_price > 0)',
-         'Expected price must be strictly positive'),
-        ('check_selling_price', 'CHECK(selling_price > 0)',
-         'Selling price must be positive')
-    ]
+
 
     @api.depends("living_area", "garden_area")
     def _compute_total_area(self):
@@ -55,10 +56,11 @@ class EstateProperty(models.Model):
 
     @api.depends("offer_ids")
     def _compute_best_price(self):
-        self.best_price = 0
-        for record in self.offer_ids:
-            if self.best_price < record.price :
-                self.best_price = record.price
+        for property in self:
+            property.best_price = 0
+            for offer in property.offer_ids:
+                if property.best_price < offer.price :
+                    property.best_price = offer.price
 
     @api.onchange("garden")
     def _onchange_garden(self):
@@ -69,18 +71,21 @@ class EstateProperty(models.Model):
             else:
                 record.garden_area = 0
                 record.garden_orientation = ''
+
     @api.depends("offer_ids.status")
     def _compute_selling_price(self):
         self.selling_price = 0;
         for offer in self.offer_ids:
             if offer.status == 'Accepted' :
               self.selling_price = offer.price
+
     @api.depends("offer_ids.status")
     def _compute_buyer_id(self):
         self.buyer_id = '';
         for offer in self.offer_ids:
             if offer.status == 'Accepted':
                self.buyer_id = offer.partner_id
+
     def action_cancel_property(self):
         for property in self:
             if property.state == "Sold":
@@ -99,9 +104,3 @@ class EstateProperty(models.Model):
             if not (property.state in ('New','Canceled')):
                 raise ValidationError("offer with status New or Canceled cannot be deleted")
 
-
-    '''
-    def create(self, vals):
-        self.env['gamification.badge'].browse(vals['badge_id']).check_granting()
-        return super(BadgeUser, self).create(vals)
-    '''

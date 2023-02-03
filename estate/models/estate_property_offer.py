@@ -9,24 +9,21 @@ class EstatePropertyOffer(models.Model):
     _name = "estate.property.offer"
     _description = "Estate Property Offer"
     _order = "price desc"
+    _sql_constraints = [
+        ('check_offer_price', 'CHECK(price >= 0)',
+         'Offer price must be positive')
+    ]
 
     price = fields.Float()
     status = fields.Selection(
         string='Status',
         selection=[('Accepted', 'Accepted'), ('Refused', 'Refused')]
         )
-
     partner_id = fields.Many2one("res.partner", string="Partner")
     property_id = fields.Many2one("estate.property")
-
     validity = fields.Integer(default = 7)
     date_deadline = fields.Date(compute="_compute_deadline", inverse="_inverse_deadline")
     property_type_id = fields.Many2one(related = "property_id.property_type_id")
-
-    _sql_constraints = [
-        ('check_offer_price', 'CHECK(price >= 0)',
-         'Offer price must be positive')
-    ]
 
     @api.constrains('price','status')
     def _check_selling_price(self):
@@ -42,6 +39,7 @@ class EstatePropertyOffer(models.Model):
             record.date_deadline = fields.Datetime.add(fields.Datetime.now(), days=record.validity)
             if record.create_date :
                 record.date_deadline = fields.Datetime.add(record.create_date, days=record.validity)
+
     def _inverse_deadline(self):
         pass
 
@@ -61,7 +59,6 @@ class EstatePropertyOffer(models.Model):
         property = self.env['estate.property'].browse(vals['property_id'])
         if property.state == 'New':
             property.state = 'Offer Received'
-
         offer_price = vals['price']
         for offer in property.offer_ids :
             if offer_price < offer.price :
