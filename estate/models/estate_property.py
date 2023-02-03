@@ -52,11 +52,12 @@ class EstateProperty(models.Model):
 
     @api.depends("offer_ids")
     def _calculate_best_price(self):
-        self.best_price = 0
-        for offers in self.offer_ids:
-            if self.best_price < offers.price:
-               self.best_price = offers.price
-
+        for property in self:
+            property.best_price = 0
+            for offers in property.offer_ids:
+                if property.best_price < offers.price:
+                   property.best_price = offers.price
+                    
     @api.onchange("garden")
     def _onchange_garden(self):
         for property in self:
