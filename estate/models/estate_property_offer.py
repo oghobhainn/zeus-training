@@ -32,14 +32,15 @@ class EstatePropertyOffer(models.Model):
             record.date_deadline += relativedelta(days=record.validity)
     @api.model
     def create(self, vals):
-        property = self.env['estate.property'].browse(vals['property_id'])
-        property.state = "offer received"
+        if vals.get('property_id') and (vals.get('price')):
+            property = self.env['estate.property'].browse(vals['property_id'])
+            property.state = "offer received"
 
-        offer_price = vals['price']
+            offer_price = vals['price']
 
-        for offer in property.offer_ids:
-            if offer.price > offer_price:
-                raise UserError(("The offer must be higher than %d!" , offer.price))
+            for offer in property.offer_ids:
+                if offer.price > offer_price:
+                    raise UserError(("The offer must be higher than %r!" , offer.price))
 
         return super().create(vals)
 

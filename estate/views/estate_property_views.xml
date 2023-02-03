@@ -97,7 +97,7 @@
                 <field name="living_area" filter_domain="[('living_area', '>=', self)]"/>
                 <field name="facades"/>
                 <separator/>
-                <filter string="Available" name="available" domain="[('state', '=', 'new'), ('state', '=', 'offer received')]"/>
+                <filter string="Available" name="available" domain="['|',('state', '=', 'new'), ('state', '=', 'offer received')]"/>
                 <group expand="1" string="Group By">
                     <filter string="Postcode" name="postcode" domain="[]" context="{'group_by':'postcode'}"/>
                 </group>
