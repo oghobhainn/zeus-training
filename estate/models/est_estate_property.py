@@ -51,7 +51,7 @@ class EstateProperty(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_except_state_is_new_or_cancelled(self):
         if any(property.state not in ['new', 'cancelled'] for property in self):
-            raise UserError('You cannot delete a property that is not new or cancelled!')
+            raise UserError(_('You cannot delete a property that is not new or cancelled!'))
 
     @api.depends('living_area', 'garden_area')
     def _set_area(self):
@@ -91,13 +91,13 @@ class EstateProperty(models.Model):
     def action_property_sold(self):
         for record in self:
             if record.state == 'cancelled':
-                raise ValidationError(("An Estate Property that is %s can not be %s") % (record.state,'sold'))
+                raise ValidationError(_("An Estate Property that is %s can not be %s", record.state, 'sold'))
             else:
                 record.state = 'sold'
 
     def action_property_cancelled(self):
         for record in self:
             if record.state == 'sold':
-                raise ValidationError(("An Estate Property that is %s can not be %s") % (record.state, 'cancelled'))
+                raise ValidationError(_("An Estate Property that is %s can not be %s", record.state, 'cancelled'))
             else:
                 record.state = 'cancelled'
