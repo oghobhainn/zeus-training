@@ -19,24 +19,25 @@ class EstatePropertyOffer(models.Model):
     validity = fields.Integer('Validity', default='7')
     date_deadline = fields.Date(string='Date Deadline', compute='_compute_date_deadline',
                                 inverse='_inverse_date_deadline')
+    property_type_id = fields.Many2one(related='property_id.property_type_id')
 
     @api.depends('validity')
     def _compute_date_deadline(self):
         #print('Hello compute')
-        for record in self:
-            date_creation = record.create_date
-            if not record.create_date:
+        for offer in self:
+            date_creation = offer.create_date
+            if not offer.create_date:
                 date_creation = fields.Date.today()
 
-            record.date_deadline = fields.Date.add(date_creation, days=record.validity)
+            offer.date_deadline = fields.Date.add(date_creation, days=offer.validity)
 
     @api.constrains('price', 'status')
     def check_percentage_price(self):
         message = 'The selling price must be 90% of the expected price'
-        for record in self:
-            if (record.status == 'accepted') and (record.price != None):
+        for offer in self:
+            if (offer.status == 'accepted') and (offer.price != None):
                     expectedprice = self.property_id.expected_price * 0.9
-                    if record.price < expectedprice:
+                    if offer.price < expectedprice:
                         raise ValidationError(_(message))
 
     def _inverse_date_deadline(self):
@@ -44,29 +45,31 @@ class EstatePropertyOffer(models.Model):
         #import ipdb;
         #ipdb.set_trace()
 
-        for record in self:
-            date_creation = record.create_date
-            if not record.create_date:
+        for offer in self:
+            date_creation = offer.create_date
+            if not offer.create_date:
                 date_creation = fields.Date.today()
             else:
-                date_creation = record.create_date
+                date_creation = offer.create_date
 
-            date_creation = datetime.date(record.create_date)
-            deltadays = record.date_deadline - date_creation
+            date_creation = datetime.date(offer.create_date)
+            deltadays = offer.date_deadline - date_creation
 
-            record.validity = deltadays.days
+            offer.validity = deltadays.days
 
     def action_offer_accept(self):
-        for record in self:
-            if 'accepted' in record.mapped('property_id.offer_ids.status'):
+        for offer in self:
+            if 'accepted' in offer.mapped('property_id.offer_ids.status'):
                 raise exceptions.ValidationError(_('Only one offer can be accepted!'))
             else:
-                record.status = 'accepted'
+                offer.status = 'accepted'
+                offer.property_id.state = 'offer received'
                 #record.property_id.buyer_id = record.partner_id
 
         return True
 
     def action_offer_refuse(self):
-        for record in self:
-            record.status = 'refused'
+        for offer in self:
+            offer.status = 'refused'
+
         return True

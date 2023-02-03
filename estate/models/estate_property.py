@@ -43,7 +43,7 @@ class EstateProperty(models.Model):
     buyer_id = fields.Many2one('res.partner', string='Buyer', copy=False)
     salesperson_id = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
     property_tag_ids = fields.Many2many('estate.property.tag', string='Property Tags')
-    offer_ids = fields.One2many('estate.property.offer', 'property_id', string='Tests')
+    offer_ids = fields.One2many('estate.property.offer', 'property_id')
     total_area = fields.Integer(compute='_compute_total_area', string='Total Area')
     best_price = fields.Float(compute='_compute_best_price', string='Best Price')
 
@@ -90,16 +90,16 @@ class EstateProperty(models.Model):
         #    record.name = "Something"
         #return True
         message = 'You can\'t cancel a sold property!'
-        for record in self:
-            if record.state == 'canceled':
+        for property in self:
+            if property.state == 'canceled':
                 raise exceptions.UserError(_(message))
             self.state = 'sold'
         return  True
 
     def action_cancel(self):
         message = 'You can\'t cancel a sold property!'
-        for record in self:
-            if record.state == 'sold':
+        for property in self:
+            if property.state == 'sold':
                 raise exceptions.UserError(_(message))
             self.state = 'canceled'
         return  True
