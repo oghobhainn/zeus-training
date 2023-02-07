@@ -1,5 +1,5 @@
 <odoo>
-    <menuitem id="estate_menu_root" name="Real Estate (ZeusIT) test">
+    <menuitem id="estate_menu_root" name="Real Estate (ZeusIT) odoosh">
         <menuitem id="estate_advertisement_menu" name="Advertisements">
             <menuitem id="estate_model_menu_action" action="estate_property_action"/>
         </menuitem>
