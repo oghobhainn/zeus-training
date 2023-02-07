@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="shopping_list_view_tree" model="ir.ui.view">
+        <field name="name">shopping.list.tree</field>
+        <field name="model">shopping.list</field>
+        <field name="arch" type="xml">
+            <tree string="Shopping List">
+                <field name="name"/>
+                <field name="date_list" />
+                <field name="state" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="shopping_list_view_kanban" model="ir.ui.view">
+        <field name="name">shopping.list.kanban</field>
+        <field name="model">shopping.list</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status_name" records_draggable="false">
+                <template>
+                     <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <h2 class="o_kanban_record_title">
+                                <field name="name"/><br/>
+                            </h2>
+                        </div>
+                    </t>
+                </template>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="shopping_list_view_form" model="ir.ui.view">
+        <field name="name">shopping.list.form</field>
+        <field name="model">shopping.list</field>
+        <field name="arch" type="xml">
+            <form string="Shopping List">
+                <header>
+                    <button name="action_set_finished" states="new,in_progress,on_hold" string="Finished" type="object" />
+                    <button name="action_set_cancel" states="new,in_progress,on_hold" string="Cancel" type="object" />
+                    <field name="state" widget="statusbar" statusbar_visible="new,in_progress,on_hold,finished" />
+                </header>
+                <sheet>
+                    <field name="active" invisible="1" />
+                    <div class="Title">
+                        <h1>
+                            <field name="name" />
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_list" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Detail">
+                            <field name="detail_ids" options="{'create': [('state', '=', 'new')]}" />
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="shopping_list_view_action" model="ir.actions.act_window">
+        <field name="name">Shopping List</field>
+        <field name="res_model">shopping.list</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+</odoo>

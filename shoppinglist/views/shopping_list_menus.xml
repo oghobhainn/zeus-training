@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="shopping_list_menu_root" name="Shopping List" web_icon="shoppinglist,static/description/icon.png">
+        <menuitem id="sl_menu_first_level" name="Lists">
+            <menuitem id="shopping_list_menu_action" action="shopping_list_view_action" name="List Overview"/>
+        </menuitem>
+        <menuitem id="sl_menu_setting_level" name="Settings">
+            <menuitem id="status_list_menu_action" action="status_list_view_action" name="Status" />
+        </menuitem>
+    </menuitem>
+</odoo>
