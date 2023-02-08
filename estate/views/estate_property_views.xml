@@ -20,6 +20,7 @@
                 <field name="selling_price"/>
                 <field name="date_availability"/>
                 <field name="state"/>
+                <field name="test_odoosh"/>
              </tree>
         </field>
     </record>
