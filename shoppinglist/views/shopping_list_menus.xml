@@ -5,7 +5,7 @@
             <menuitem id="shopping_list_menu_action" action="shopping_list_view_action" name="List Overview"/>
         </menuitem>
         <menuitem id="sl_menu_setting_level" name="Settings">
-            <menuitem id="status_list_menu_action" action="status_list_view_action" name="Status" />
+            <menuitem id="status_list_menu_action" action="status_list_view_action" name="Status List" />
         </menuitem>
     </menuitem>
 </odoo>
