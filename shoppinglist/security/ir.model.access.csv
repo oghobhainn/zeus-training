@@ -1,0 +1,4 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+shoppinglist.access_status_list,access_status_list,shoppinglist.model_status_list,base.group_user,1,1,1,1
+shoppinglist.access_shopping_list_detail,access_shopping_list_detail,shoppinglist.model_shopping_list_detail,base.group_user,1,1,1,1
+shoppinglist.access_shopping_list,access_shopping_list,shoppinglist.model_shopping_list,base.group_user,1,1,1,1
