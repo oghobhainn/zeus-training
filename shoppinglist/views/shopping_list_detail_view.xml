@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="shopping_detail_view_tree" model="ir.ui.view">
+        <field name="name">shopping.list.detail.tree</field>
+        <field name="model">shopping.list.detail</field>
+        <field name="arch" type="xml">
+            <tree string="Details" editable="bottom">
+                <field name="name"/>
+                <field name="in_bag" attrs="{'invisible': [('status_list', '=', 'on_hold')]}"/>
+                <field name="status_list" invisible="1" />
+                <field name="remark" />
+                <field name="user_created" optional="hide" />
+            </tree>
+        </field>
+    </record>
+
+
+
+    <record id="shopping_detail_view_form" model="ir.ui.view">
+        <field name="name">shopping.list.detail.form</field>
+        <field name="model">shopping.list.detail</field>
+        <field name="arch" type="xml">
+            <form string="Details">
+                <sheet>
+                   <group>
+                       <field name="name"/>
+                       <field name="in_bag" attrs="{'invisible': [('status_list', '=', 'new')]}" />
+                       <field name="status_list" invisible="1" />
+                       <field name="remark" />
+                   </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

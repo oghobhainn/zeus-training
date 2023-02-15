@@ -1,3 +1,0 @@
-# zeus-training
-test
-
